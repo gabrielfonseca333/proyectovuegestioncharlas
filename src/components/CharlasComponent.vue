@@ -58,16 +58,20 @@
                       require('../assets/banner_default.jpg')
                       " @error="onImageError($event)" alt="Imagen de Charla" />
                     <div class="card-body">
+
                       <h5 class="card-title">{{ charla.titulo }}</h5>
                       <p class="card-text">{{ charla.descripcion }}</p>
                     </div>
                     <div class="card-footer">
-                      <small class="text-body-secondary">
-                        <button class="btn custom-button" @click="abrirModal(charla)">
+                      <small class="text-body-secondary d-flex justify-content-between align-items-start w-100">
+                        <button style="margin-top: 0px;" class="btn custom-button" @click="abrirModal(charla)">
                           Ver detalles
                         </button>
+                        <p class="mb-0">Votos: {{ votosCharlas[charla.idCharla] ?? '0' }}</p>
                       </small>
                     </div>
+
+
                   </div>
                 </div>
                 <!-- Mensaje si no hay charlas -->
@@ -205,7 +209,8 @@ export default {
       charlaSeleccionada: null,
       mostrarDescripcion: false,
       mostrarRecursos: false,
-      mostrarComentarios: false
+      mostrarComentarios: false,
+      votosCharlas: {},
     };
   }, computed: {
     rondasFiltradas() {
@@ -270,11 +275,15 @@ export default {
         .then((response) => {
           this.charlas = response;
           this.charlasFiltradas = this.charlas;
-          console.log(response);
+          console.log("❤", response);
           this.filtrarCharlas();
           this.estadosDisponibles = [
             ...new Set(this.charlas.map((charla) => charla.estadoCharla)),
           ];
+
+          this.charlas.forEach(charla =>
+            this.cargarVotosCharla(charla.idCharla));
+
         })
         .catch((error) => {
           console.error("Error al cargar las charlas:", error);
@@ -333,16 +342,16 @@ export default {
       if (!this.newComment.trim()) {
         return;
       }
-      const fechaActual = moment().locale('es').format('DD/MM/YYYY HH:mm'); 
+      const fechaActual = moment().locale('es').format('DD/MM/YYYY HH:mm');
 
       const comentario = {
         idCharla: this.charlaSeleccionada.idCharla,
-        idUsuario: 13, 
+        idUsuario: 13,
         contenido: this.newComment,
         fecha: fechaActual,
       };
 
-      this.isLoading = true; 
+      this.isLoading = true;
 
       serviceCharlas
         .setComentario(comentario)
@@ -392,13 +401,30 @@ export default {
         if (horas > 10)
           return `${horas} horas ${minutos} min`;
         if (horas < 10)
-        return `${horas} hora ${minutos} min`;
+          return `${horas} hora ${minutos} min`;
         if (horas == 0)
           return `${minutos} min`;
         if (minutos < 0)
           return `${segundos} seg`;
       }
+    },
+
+
+    cargarVotosCharla(idCharla) {
+
+      serviceCharlas.getVotosCharla(idCharla)
+        .then(response => {
+          console.log("✅ Se obtuvieron los votos de la charla ID", idCharla, response);
+          this.votosCharlas[idCharla] = response.votos;
+        })
+        .catch(() => {
+          console.error("❌ No se pudieron obtener los votos de la charla ID", idCharla);
+        });
     }
+
+
+
+
   },
   mounted() {
     this.cargarRondas(); // Cargar rondas al iniciar
