@@ -67,7 +67,7 @@
                         <button style="margin-top: 0px;" class="btn custom-button" @click="abrirModal(charla)">
                           Ver detalles
                         </button>
-                        <p class="mb-0">Votos: {{ votosCharlas[charla.idCharla] ?? '0' }}</p>
+                        <p v-if="role != 2" class="mb-0">Votos: {{ votosCharlas[charla.idCharla] ?? '0' }}</p>
                       </small>
                     </div>
 
@@ -186,10 +186,12 @@
 
 <script>
 import CharlasService from "@/services/CharlasService";
+import PerfilService from "@/services/PerfilService";
 import Swal from "sweetalert2";
 const serviceCharlas = new CharlasService();
 import moment from 'moment';
 import 'moment/locale/es';
+const servicePerf = new PerfilService();
 
 export default {
   name: "CharlasComponent",
@@ -414,13 +416,23 @@ export default {
 
       serviceCharlas.getVotosCharla(idCharla)
         .then(response => {
-          console.log("✅ Se obtuvieron los votos de la charla ID", idCharla, response);
           this.votosCharlas[idCharla] = response.votos;
         })
         .catch(() => {
           console.error("❌ No se pudieron obtener los votos de la charla ID", idCharla);
         });
-    }
+    },
+
+    obtenerUsuario() {
+      servicePerf.getUsuarioPerfil()
+        .then(response => {
+          this.role = response.usuario.idRole;
+          console.log("rol: ", this.role);
+        })
+        .catch(() => {
+          console.error("❌ No se pudo obtener el usuario");
+        });
+    },
 
 
 
@@ -428,6 +440,8 @@ export default {
   },
   mounted() {
     this.cargarRondas(); // Cargar rondas al iniciar
+    this.obtenerUsuario();
+
   }
 };
 </script>
