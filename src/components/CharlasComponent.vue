@@ -63,7 +63,7 @@
                       <p class="card-text">{{ charla.descripcion }}</p>
                     </div>
                     <div class="card-footer">
-                      <small class="text-body-secondary d-flex justify-content-between align-items-start w-100">
+                      <small class="text-body-secondary d-flex justify-content-between align-items-center w-100">
                         <button style="margin-top: 0px;" class="btn custom-button" @click="abrirModal(charla)">
                           Ver detalles
                         </button>
